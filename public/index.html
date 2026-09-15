@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Tax Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  body { font-family: Arial, sans-serif; max-width: 480px; margin: 60px auto; background:#f4f6f8; }
+  .card { background:#fff; padding: 32px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  h1 { font-size: 22px; color:#222; }
+  label { display:block; margin-top: 16px; font-weight:bold; color:#333; }
+  input { width:100%; padding:10px; margin-top:6px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; }
+  button { margin-top: 20px; width:100%; padding:12px; background:#0f62fe; color:#fff; border:none; border-radius:6px; font-size:16px; cursor:pointer; }
+  button:hover { background:#0043ce; }
+  .result { margin-top: 24px; padding: 16px; background:#e8f0fe; border-radius:6px; display:none; }
+  .result p { margin: 6px 0; }
+  .error { color:#c0392b; margin-top:10px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>💰 Tax Calculator</h1>
+    <label for="income">Annual Income ($)</label>
+    <input type="number" id="income" placeholder="e.g. 55000" min="0" />
+    <button onclick="calculate()">Calculate Tax</button>
+    <div class="error" id="error"></div>
+    <div class="result" id="result">
+      <p><strong>Income:</strong> $<span id="rIncome"></span></p>
+      <p><strong>Tax Owed:</strong> $<span id="rTax"></span></p>
+      <p><strong>Net Income:</strong> $<span id="rNet"></span></p>
+      <p><strong>Effective Rate:</strong> <span id="rRate"></span>%</p>
+    </div>
+  </div>
+
+<script>
+async function calculate() {
+  const income = parseFloat(document.getElementById('income').value);
+  const errorEl = document.getElementById('error');
+  const resultEl = document.getElementById('result');
+  errorEl.textContent = '';
+  resultEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ income })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Calculation failed');
+
+    document.getElementById('rIncome').textContent = data.income.toFixed(2);
+    document.getElementById('rTax').textContent = data.tax.toFixed(2);
+    document.getElementById('rNet').textContent = data.net.toFixed(2);
+    document.getElementById('rRate').textContent = data.effectiveRatePercent.toFixed(2);
+    resultEl.style.display = 'block';
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+</script>
+</body>
+</html>

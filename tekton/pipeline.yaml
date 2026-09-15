@@ -1,0 +1,72 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: tax-calculator-pipeline
+spec:
+  workspaces:
+    - name: pipeline-ws
+  params:
+    - name: repo-url
+      type: string
+      description: Git repository URL for the Tax Calculator app
+    - name: revision
+      type: string
+      default: main
+    - name: image-name
+      type: string
+      description: Full IBM Cloud Container Registry image reference, e.g. us.icr.io/<namespace>/tax-calculator:latest
+
+  tasks:
+    # 1. Clone the source code
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: pipeline-ws
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+        - name: deleteExisting
+          value: "true"
+
+    # 2. Install npm dependencies
+    - name: npminstall
+      taskRef:
+        name: npm-install
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+
+    # 3. Run Jasmine unit tests
+    - name: tests
+      taskRef:
+        name: jasmine-test
+      runAfter:
+        - npminstall
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+
+    # 4. Build & push the container image with buildah
+    - name: build
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      runAfter:
+        - tests
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+      params:
+        - name: IMAGE
+          value: $(params.image-name)
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: TLSVERIFY
+          value: "false"
