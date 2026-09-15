@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tax Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="card">
+<h1>?? Tax Calculator</h1>
+<label for="income">Annual Income ($)</label>
+<input type="number" id="income" placeholder="e.g. 55000" min="0">
+<button onclick="calculate()">Calculate Tax</button>
+<div class="error" id="error"></div>
+<div class="result" id="result">
+<p><strong>Income:</strong> $<span id="rIncome"></span></p>
+<p><strong>Tax Owed:</strong> $<span id="rTax"></span></p>
+<p><strong>Net Income:</strong> $<span id="rNet"></span></p>
+<p><strong>Effective Rate:</strong> <span id="rRate"></span>%</p>
+</div>
+</div>
+<script src="taxCalculator.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

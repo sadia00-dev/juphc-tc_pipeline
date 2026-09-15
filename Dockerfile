@@ -1,19 +1,9 @@
-# ---- Base image ----
-FROM node:18-alpine
+FROM nginx
 
-# ---- Set working directory ----
-WORKDIR /usr/src/app
+COPY favicon.ico /usr/share/nginx/html/favicon.ico
+COPY index.html /usr/share/nginx/html/index.html
+COPY script.js /usr/share/nginx/html/script.js
+COPY style.css /usr/share/nginx/html/style.css
+COPY taxCalculator.js /usr/share/nginx/html/taxCalculator.js
 
-# ---- Install dependencies first (better layer caching) ----
-COPY package*.json ./
-RUN npm install --production
-
-# ---- Copy application source ----
-COPY . .
-
-# ---- App listens on port 8080 ----
-EXPOSE 8080
-ENV PORT=8080
-
-# ---- Start the app ----
-CMD ["node", "server.js"]
+EXPOSE 80
